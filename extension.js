@@ -7,6 +7,7 @@
 // 
 // Author:
 //   Bill Smith <snowmanam2@gmail.com>
+//   License: GPLv2+
 //
 // Original code by:
 //   Kurt Rottmann <kurtrottmann@gmail.com>
@@ -48,7 +49,7 @@ const dir = function(obj){
     return props;
 }
 
-let windowList, restoreState={}, clockWrapper, bottomPanel=null;
+let windowList = null, restoreState={}, clockWrapper, bottomPanel=null;
 
 
 function AppMenuButton(app, metaWindow, animation) {
@@ -319,21 +320,35 @@ WindowList.prototype = {
         global.screen.connect('notify::n-workspaces', Lang.bind(this, this._changeWorkspaces));
 
         Main.panel.actor.connect('allocate', Lang.bind(Main.panel, this._allocateBoxes));
-        Main.overview.connect('hiding', Lang.bind(this, function () {
+        this._hideId = Main.overview.connect('hiding', Lang.bind(this, function () {
             this.hiding = false;
             refreshPanel(this); 
         }));
-        Main.overview.connect('showing', Lang.bind(this, function () {
+        this._showId = Main.overview.connect('showing', Lang.bind(this, function () {
             this.hiding = true;
             bottomPanel.actor.hide();
             _moveMessageTrayDown();
         }));
+        
+        this._refreshItems();
+    },
+    
+    destroy: function() {
+        for ( let i=0; i<this._workspaces.length; ++i ) {
+            let ws = this._workspaces[i];
+            ws.disconnect(ws._windowAddedId);
+            ws.disconnect(ws._windowRemovedId);
+        }
+        
+        Main.overview.disconnect (this._hideId);
+        Main.overview.disconnect (this._showId);
+        
+        this.actor.destroy();
     },
 
     _onFocus: function() {
         
-        for ( let i = 0; i < this._windows.length; i++)
-        {
+        for ( let i = 0; i < this._windows.length; i++) {
             this._windows[i].doFocus();
         } 
     },
@@ -564,6 +579,11 @@ BottomPanel.prototype = {
         this.actor.set_position(primary.x, primary.y+primary.height-h);
         this.actor.set_size(primary.width, h);
     },
+    
+    destroy: function () {
+        Main.layoutManager.removeChrome(this.actor);
+        this.actor.destroy();
+    }
 };
 
 function BottomPanel() {
@@ -573,19 +593,29 @@ function BottomPanel() {
 }
 
 
-
 function init() {
     
-    bottomPanel = null;
 }
 
 function enable() {
    
     windowList = new WindowList(); 
     bottomPanel = new BottomPanel();
+    
+    bottomPanel.relayout();
 }
 
 function disable() {
     
-    if (bottomPanel) bottomPanel.destroy();
+    if (bottomPanel) {
+        bottomPanel.destroy();
+        bottomPanel = null;
+    }
+    if (windowList) {
+        windowList.destroy();
+        windowList  = null;
+    }
+    
+    _moveMessageTrayDown();
 }
+
