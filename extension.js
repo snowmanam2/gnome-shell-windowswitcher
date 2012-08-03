@@ -31,6 +31,7 @@ const PopupMenu = imports.ui.popupMenu;
 const PanelMenu = imports.ui.panelMenu;
 const Signals = imports.signals;
 
+// TODO: Put these in GSettings
 const PANEL_ICON_SIZE = 24;
 const SPINNER_ANIMATION_TIME = 1;
 const THUMBNAIL_DEFAULT_SIZE = 150;
@@ -39,8 +40,8 @@ const BUTTON_MAX_SIZE = 250;
 const BUTTON_MIN_SIZE = 70;
 
 // Load our extension so we can access other files in our extensions dir as libraries
-const Extension = imports.ui.extensionSystem.extensions['windowswitcher@snowmanam2.gmail.com'];
-const SpecialMenus = Extension.specialMenus;
+const Extension = imports.misc.extensionUtils.getCurrentExtension();;
+const SpecialMenus = Extension.imports.specialMenus;
 
 
 const dir = function(obj){
@@ -117,8 +118,8 @@ AppMenuButton.prototype = {
         this.rightClickMenu = new SpecialMenus.RightClickAppPopupMenu(this.actor, this.metaWindow, this.app);
         this.menuManager = new PopupMenu.PopupMenuManager({actor: this.actor});
         this.menuManager.addMenu(this.rightClickMenu);
-        this.hovCont = new Extension.specialMenus.HoverMenuController(this.actor, 
-                                    new Extension.specialMenus.AppThumbnailHoverMenu(this.actor, this.metaWindow, this.app));
+        this.hovCont = new SpecialMenus.HoverMenuController(this.actor, 
+                                    new SpecialMenus.AppThumbnailHoverMenu(this.actor, this.metaWindow, this.app));
 
     },
 
@@ -136,7 +137,7 @@ AppMenuButton.prototype = {
     },
 
     _onButtonRelease: function(actor, event) {
-        if ( Shell.get_event_state(event) & Clutter.ModifierType.BUTTON1_MASK ) {
+        if ( event.get_state() & Clutter.ModifierType.BUTTON1_MASK ) {
             if ( this.rightClickMenu.isOpen ) {
                 this.rightClickMenu.toggle();
             }
@@ -225,12 +226,12 @@ AppMenuButton.prototype = {
 
         let [minWidth, minHeight, naturalWidth, naturalHeight] = this._iconBox.get_preferred_size();
 
-        let direction = this.actor.get_direction();
+        let direction = this.actor.get_text_direction();
 
         let yPadding = Math.floor(Math.max(0, allocHeight - naturalHeight) / 2);
         childBox.y1 = yPadding;
         childBox.y2 = childBox.y1 + Math.min(naturalHeight, allocHeight);
-        if (direction == St.TextDirection.LTR) {
+        if (direction == Clutter.TextDirection.LTR) {
             childBox.x1 = 0;
             childBox.x2 = childBox.x1 + Math.min(naturalWidth, allocWidth);
         } else {
@@ -247,7 +248,7 @@ AppMenuButton.prototype = {
         childBox.y1 = yPadding;
         childBox.y2 = childBox.y1 + Math.min(naturalHeight, allocHeight);
 
-        if (direction == St.TextDirection.LTR) {
+        if (direction == Clutter.TextDirection.LTR) {
             childBox.x1 = Math.floor(iconWidth / 2);
             childBox.x2 = Math.min(childBox.x1 + naturalWidth, allocWidth);
         } else {
@@ -256,7 +257,7 @@ AppMenuButton.prototype = {
         }
         this._label.actor.allocate(childBox, flags);
 
-        if (direction == St.TextDirection.LTR) {
+        if (direction == Clutter.TextDirection.LTR) {
             childBox.x1 = Math.floor(iconWidth / 2) + this._label.actor.width;
             childBox.x2 = childBox.x1 + this._spinner.actor.width;
             childBox.y1 = box.y1;
@@ -354,7 +355,7 @@ WindowList.prototype = {
     },
 
     _refreshItems: function() {
-        this.actor.destroy_children();
+        this.actor.destroy_all_children();
         this._windows.length = 0;  // Modified to avoid referencing problems
 
         let metaWorkspace = global.screen.get_active_workspace();
@@ -461,7 +462,7 @@ WindowList.prototype = {
 
         childBox.y1 = 0;
         childBox.y2 = allocHeight;
-        if (this.actor.get_direction() == St.TextDirection.RTL) {
+        if (this.actor.get_text_direction() == Clutter.TextDirection.RTL) {
             childBox.x1 = allocWidth - Math.min(allocWidth - rightNaturalWidth, leftNaturalWidth);
             childBox.x2 = allocWidth;
         } else {
@@ -478,7 +479,7 @@ WindowList.prototype = {
 
         childBox.y1 = 0;
         childBox.y2 = allocHeight;
-        if (this.actor.get_direction() == St.TextDirection.RTL) {
+        if (this.actor.get_text_direction() == Clutter.TextDirection.RTL) {
             childBox.x1 = 0;
             childBox.x2 = Math.min(Math.floor(sideWidth), rightNaturalWidth);
         } else {

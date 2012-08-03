@@ -25,3 +25,10 @@
 .window-thumbnail:hover {
     background-color: #4c4c4c;
 }
+
+#bottomPanel {
+    color: #ffffff;
+    background-color: black;
+    font-size: 10.5pt;
+    height: 1.86em;
+}

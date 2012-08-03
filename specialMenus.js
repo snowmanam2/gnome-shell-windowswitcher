@@ -43,7 +43,7 @@ RightClickPopupMenu.prototype = {
 
     _onParentActorButtonRelease: function(actor, event) {
         let buttonMask = Clutter.ModifierType['BUTTON' + this.openOnButton + '_MASK'];
-        if (Shell.get_event_state(event) & buttonMask) {
+        if (event.get_state() & buttonMask) {
             this.toggle();
         }
         
