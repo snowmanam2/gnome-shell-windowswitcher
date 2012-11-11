@@ -216,23 +216,25 @@ RightClickAppPopupMenu.prototype = {
         this._menuItemCloseWindow = new PopupMenu.PopupMenuItem('Close');
         this._menuItemCloseWindow.connect('activate', Lang.bind(this, this._onMenuItemCloseWindowActivate));
         this.addMenuItem(this._menuItemCloseWindow);
+        
         this._menuItemMinimizeWindow = new PopupMenu.PopupMenuItem('Minimize');
         this._menuItemMinimizeWindow.connect('activate', Lang.bind(this, this._onMenuItemMinimizeWindowActivate));
         this.addMenuItem(this._menuItemMinimizeWindow);
         
-        /* Modified: this was broken anyway, so don't give them false hope */
-        //this._menuItemMaximizeWindow = new PopupMenu.PopupMenuItem('Maximize');
-        //this._menuItemMaximizeWindow.connect('activate', Lang.bind(this, this._onMenuItemMaximizeWindowActivate));
-        //this.addMenuItem(this._menuItemMaximizeWindow)
+        this._menuItemMaximizeWindow = new PopupMenu.PopupMenuItem('Maximize');
+        this._menuItemMaximizeWindow.connect('activate', Lang.bind(this, this._onMenuItemMaximizeWindowActivate));
+        this.addMenuItem(this._menuItemMaximizeWindow)
     },
 
     _onMenuItemMaximizeWindowActivate: function() {
-        //causes gnome-shell 3.0.2 to crash
-        this.metaWindow.maximize(global.get_current_time());
+        // "3" is the the MetaMaximizeFlags parameter; 1 << 0 for horizontal, 1 << 1 for vertical
+        this.metaWindow.unminimize();
+        this.metaWindow.maximize(3);
+        this.metaWindow.activate(global.get_current_time());
     },
 
     _onMenuItemMinimizeWindowActivate: function() {
-        this.metaWindow.minimize(global.get_current_time());
+        this.metaWindow.minimize();
     },
 
     _onMenuItemCloseWindowActivate: function() {
