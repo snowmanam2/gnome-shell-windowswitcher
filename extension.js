@@ -38,6 +38,7 @@ const THUMBNAIL_DEFAULT_SIZE = 150;
 const HOVER_MENU_DELAY = 1; // seconds
 const BUTTON_MAX_SIZE = 250;
 const BUTTON_MIN_SIZE = 70;
+const SHOW_UNINTERESTING_WINDOWS = true;
 
 // Load our extension so we can access other files in our extensions dir as libraries
 const Extension = imports.misc.extensionUtils.getCurrentExtension();;
@@ -371,7 +372,7 @@ WindowList.prototype = {
         for ( let i = 0; i < windows.length; ++i ) {
             
             let metaWindow = windows[i];
-            if ( metaWindow && tracker.is_window_interesting(metaWindow) ) {
+            if ( metaWindow && (tracker.is_window_interesting(metaWindow) || SHOW_UNINTERESTING_WINDOWS) ) {
                 let app = tracker.get_window_app(metaWindow);
                 if ( app ) {
                     this._windows[j] = new AppMenuButton(app, metaWindow, false);
@@ -400,7 +401,7 @@ WindowList.prototype = {
         let app = tracker.get_window_app(metaWindow);
         
         
-        if ( app && tracker.is_window_interesting(metaWindow) ) {
+        if ( app && (tracker.is_window_interesting(metaWindow) || SHOW_UNINTERESTING_WINDOWS) ) {
             let len = this._windows.length;
             this._windows[len] = new AppMenuButton(app, metaWindow, true);
             this.actor.add(this._windows[len].actor);
