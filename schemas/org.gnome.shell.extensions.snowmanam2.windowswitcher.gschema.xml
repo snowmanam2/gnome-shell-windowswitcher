@@ -36,5 +36,10 @@
 			<summary>Show appbuttons for uninteresting windows (i.e. dialogs)? </summary>
 			<description/>
 		</key>
+		<key type="b" name="show-hover-menu">
+			<default>true</default>
+			<summary>Show menu on hover event? </summary>
+			<description/>
+		</key>
 	</schema>
 </schemalist>

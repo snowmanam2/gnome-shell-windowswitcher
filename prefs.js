@@ -51,6 +51,7 @@ function buildPrefsWidget() {
     box_panel.pack_start(spinner("button-min-size", "AppButton Minimum Size", 0, 400, 10), false, false, 5);
     box_panel.pack_start(spinner("button-max-size", "AppButton Maximum Size", 0, 400, 10), false, false, 5);
     box_panel.pack_start(switcher("show-uninteresting-windows", "Show Dialogs on Panel", ""), false, false, 5);
+    box_panel.pack_start(switcher("show-hover-menu", "Show Hover Menus", ""), false, false, 5);
 	
 	box_panel.show_all();
 		

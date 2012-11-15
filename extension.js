@@ -104,7 +104,7 @@ AppMenuButton.prototype = {
         this.rightClickMenu = new SpecialMenus.RightClickAppPopupMenu(this.actor, this.metaWindow, this.app);
         this.menuManager = new PopupMenu.PopupMenuManager({actor: this.actor});
         this.menuManager.addMenu(this.rightClickMenu);
-        this.hovCont = new SpecialMenus.HoverMenuController(this.actor, 
+        if (settings.get_boolean ("show-hover-menu")) this.hovCont = new SpecialMenus.HoverMenuController(this.actor, 
                                     new SpecialMenus.AppThumbnailHoverMenu(this.actor, this.metaWindow, this.app));
 
     },
