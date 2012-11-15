@@ -31,27 +31,12 @@ const PopupMenu = imports.ui.popupMenu;
 const PanelMenu = imports.ui.panelMenu;
 const Signals = imports.signals;
 
-// TODO: Put these in GSettings
-const PANEL_ICON_SIZE = 24;
-const SPINNER_ANIMATION_TIME = 1;
-const THUMBNAIL_DEFAULT_SIZE = 150;
-const HOVER_MENU_DELAY = 1; // seconds
-const BUTTON_MAX_SIZE = 250;
-const BUTTON_MIN_SIZE = 70;
-const SHOW_UNINTERESTING_WINDOWS = true;
-
 // Load our extension so we can access other files in our extensions dir as libraries
-const Extension = imports.misc.extensionUtils.getCurrentExtension();;
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const SpecialMenus = Extension.imports.specialMenus;
+const Lib = Extension.imports.lib;
 
-
-const dir = function(obj){
-    let props = [a for (a in obj)];
-    props.concat(Object.getOwnPropertyNames(obj));
-    return props;
-}
-
-let windowList = null, restoreState={}, clockWrapper, bottomPanel=null;
+let windowList = null, restoreState={}, bottomPanel=null, settings = null;
 
 
 function AppMenuButton(app, metaWindow, animation) {
@@ -102,11 +87,11 @@ AppMenuButton.prototype = {
             this.hide();
         }));
 
-        this._spinner = new Panel.AnimatedIcon('process-working.svg', PANEL_ICON_SIZE);
+        this._spinner = new Panel.AnimatedIcon('process-working.svg', settings.get_int("panel-icon-size"));
         this._container.add_actor(this._spinner.actor);
         this._spinner.actor.lower_bottom();
 
-        let icon = this.app.get_faded_icon(2 * PANEL_ICON_SIZE);
+        let icon = this.app.get_faded_icon(2 * settings.get_int("panel-icon-size"));
         this._onTitleChange();
         this._iconBox.set_child(icon);
 
@@ -183,7 +168,7 @@ AppMenuButton.prototype = {
     stopAnimation: function() {
         Tweener.addTween(this._spinner.actor,
                          { opacity: 0,
-                           time: SPINNER_ANIMATION_TIME,
+                           time: settings.get_int("spinner-animation-time"),
                            transition: "easeOutQuad",
                            onCompleteScope: this,
                            onComplete: function() {
@@ -205,8 +190,8 @@ AppMenuButton.prototype = {
         alloc.min_size = alloc.min_size + Math.max(0, minSize - Math.floor(alloc.min_size / 2));
         
         /* Modified: add a maximum size for sanity - assume is larger than minSize */
-        alloc.natural_size = alloc.natural_size + Math.max(BUTTON_MIN_SIZE,
-            Math.min(Math.max(0, naturalSize - Math.floor(alloc.natural_size / 2)), BUTTON_MAX_SIZE));
+        alloc.natural_size = alloc.natural_size + Math.max(settings.get_int("button-min-size"),
+            Math.min(Math.max(0, naturalSize - Math.floor(alloc.natural_size / 2)), settings.get_int("button-max-size")));
     },
 
     _getContentPreferredHeight: function(actor, forWidth, alloc) {
@@ -332,6 +317,10 @@ WindowList.prototype = {
             _moveMessageTrayDown();
         }));
         
+        this._settingsChangedId = settings.connect('changed', Lang.bind(this, function (){ 
+            this._refreshItems();
+        }));
+        
         this._refreshItems();
     },
     
@@ -344,6 +333,7 @@ WindowList.prototype = {
         
         Main.overview.disconnect (this._hideId);
         Main.overview.disconnect (this._showId);
+        settings.disconnect(this._settingsChangedId);
         
         this.actor.destroy();
     },
@@ -372,7 +362,7 @@ WindowList.prototype = {
         for ( let i = 0; i < windows.length; ++i ) {
             
             let metaWindow = windows[i];
-            if ( metaWindow && (tracker.is_window_interesting(metaWindow) || SHOW_UNINTERESTING_WINDOWS) ) {
+            if ( metaWindow && (tracker.is_window_interesting(metaWindow) || settings.get_boolean("show-uninteresting-windows")) ) {
                 let app = tracker.get_window_app(metaWindow);
                 if ( app ) {
                     this._windows[j] = new AppMenuButton(app, metaWindow, false);
@@ -383,7 +373,7 @@ WindowList.prototype = {
         }
 
         refreshPanel(this);
-
+        
     },
 
     _windowAdded: function(metaWorkspace, metaWindow) {
@@ -401,7 +391,7 @@ WindowList.prototype = {
         let app = tracker.get_window_app(metaWindow);
         
         
-        if ( app && (tracker.is_window_interesting(metaWindow) || SHOW_UNINTERESTING_WINDOWS) ) {
+        if ( app && (tracker.is_window_interesting(metaWindow) || settings.get_boolean("show-uninteresting-windows")) ) {
             let len = this._windows.length;
             this._windows[len] = new AppMenuButton(app, metaWindow, true);
             this.actor.add(this._windows[len].actor);
@@ -600,6 +590,10 @@ function init() {
 }
 
 function enable() {
+   
+    if (settings == null) {
+        settings = Lib.getSettings ();
+    }  
    
     windowList = new WindowList(); 
     bottomPanel = new BottomPanel();

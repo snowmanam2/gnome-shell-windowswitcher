@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+	<schema id="org.gnome.shell.extensions.snowmanam2.windowswitcher" path="/org/gnome/shell/extensions/snowmanam2/windowswitcher/">
+		<key type="i" name="panel-icon-size">
+			<default>24</default>
+			<summary>Size of icon on the panel</summary>
+			<description/>
+		</key>
+		<key type="i" name="spinner-animation-time">
+			<default>1</default>
+			<summary>Animation time for application startup spinner</summary>
+			<description/>
+		</key>
+		<key type="i" name="thumbnail-default-size">
+			<default>150</default>
+			<summary>Size of the thumbnail in the right-click menu</summary>
+			<description/>
+		</key>
+		<key type="i" name="hover-menu-timeout">
+			<default>1000</default>
+			<summary>Time to keep the hover menu visible (in ms)</summary>
+			<description/>
+		</key>
+		<key type="i" name="button-max-size">
+			<default>250</default>
+			<summary>Maximum size of an appbutton</summary>
+			<description/>
+		</key>
+		<key type="i" name="button-min-size">
+			<default>70</default>
+			<summary>Minimum size of an appbutton</summary>
+			<description/>
+		</key>
+		<key type="b" name="show-uninteresting-windows">
+			<default>true</default>
+			<summary>Show appbuttons for uninteresting windows (i.e. dialogs)? </summary>
+			<description/>
+		</key>
+	</schema>
+</schemalist>

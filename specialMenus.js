@@ -15,9 +15,10 @@ const PopupMenu = imports.ui.popupMenu;
 const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Lib = Extension.imports.lib;
 
-const HOVER_MENU_TIMEOUT = 1000;
-const THUMBNAIL_DEFAULT_SIZE = 150;
+let settings = Lib.getSettings();
 
 function RightClickPopupMenu() {
     this._init.apply(this, arguments);
@@ -105,7 +106,7 @@ HoverMenuController.prototype = {
     _onParentMenuLeave: function() {
         this.shouldClose = true;
 
-        Mainloop.timeout_add(HOVER_MENU_TIMEOUT, Lang.bind(this, this.close));
+        Mainloop.timeout_add(settings.get_int ("hover-menu-timeout"), Lang.bind(this, this.close));
     },
 
     _onEnter: function() {
@@ -114,7 +115,7 @@ HoverMenuController.prototype = {
         }
         this.shouldClose = false;
 
-        Mainloop.timeout_add(HOVER_MENU_TIMEOUT, Lang.bind(this, this.open));
+        Mainloop.timeout_add(settings.get_int ("hover-menu-timeout"), Lang.bind(this, this.open));
     },
 
     _onLeave: function() {
@@ -123,7 +124,7 @@ HoverMenuController.prototype = {
         }
         this.shouldOpen = false;
 
-        Mainloop.timeout_add(HOVER_MENU_TIMEOUT, Lang.bind(this, this.close));
+        Mainloop.timeout_add(settings.get_int ("hover-menu-timeout"), Lang.bind(this, this.close));
     },
 
     open: function() {
@@ -261,7 +262,7 @@ RightClickAppPopupMenu.prototype = {
         if (mutterWindow) {
             let windowTexture = mutterWindow.get_texture();
             let [width, height] = windowTexture.get_size();
-            let scale = Math.min(1.0, THUMBNAIL_DEFAULT_SIZE / width, THUMBNAIL_DEFAULT_SIZE / height);
+            let scale = Math.min(1.0, settings.get_int ("thumbnail-default-size") / width, settings.get_int ("thumbnail-default-size") / height);
             this.thumbnail = new Clutter.Clone ({ source: windowTexture,
                                                   reactive: true,
                                                   width: width * scale,
@@ -387,11 +388,11 @@ WindowThumbnail.prototype = {
                                         vertical: true });
         this.thumbnailActor = new St.Bin({ y_fill: false,
                                            y_align: St.Align.MIDDLE });
-        this.thumbnailActor.height = THUMBNAIL_DEFAULT_SIZE;
+        this.thumbnailActor.height = settings.get_int ("thumbnail-default-size");
         this.titleActor = new St.Label();
         //TODO: should probably do this in a smarter way in the get_size_request event or something...
         //fixing this should also allow the text to be centered
-        this.titleActor.width = THUMBNAIL_DEFAULT_SIZE;
+        this.titleActor.width = settings.get_int ("thumbnail-default-size");
 
         this.actor.add(this.thumbnailActor);
         this.actor.add(this.titleActor);
@@ -431,7 +432,7 @@ WindowThumbnail.prototype = {
         if (mutterWindow) {
             let windowTexture = mutterWindow.get_texture();
             let [width, height] = windowTexture.get_size();
-            let scale = Math.min(1.0, THUMBNAIL_DEFAULT_SIZE / width, THUMBNAIL_DEFAULT_SIZE / height);
+            let scale = Math.min(1.0, settings.get_int ("thumbnail-default-size") / width, settings.get_int ("thumbnail-default-size") / height);
             thumbnail = new Clutter.Clone ({ source: windowTexture,
                                              reactive: true,
                                              width: width * scale,
